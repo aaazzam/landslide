@@ -7,7 +7,7 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 description = "General-purpose event sourcing on OpenData Log / SlateDB and object storage."
-repository = "https://github.com/adamazzam/slog"
+repository = "https://github.com/aaazzam/slog"
 
 [dependencies]
 slatedb = "0.15"
