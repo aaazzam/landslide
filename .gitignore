@@ -1,0 +1,23 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Rust build output
+/target/
+
+# Local databases and generated reports
+*.db
+*.sqlite
+scripts/*.png
+
+# Local model catalogs
+fireworks_models.jsonl
+modal_endpoint_catalog.jsonl
+models_fireworks_modal.csv
