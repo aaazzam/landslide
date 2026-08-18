@@ -1332,6 +1332,59 @@ dependencies = [
 ]
 
 [[package]]
+name = "landslide"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "bincode",
+ "bytes",
+ "object_store",
+ "serde",
+ "serde_json",
+ "slatedb",
+ "thiserror 2.0.20",
+ "tokio",
+ "ulid",
+]
+
+[[package]]
+name = "landslide-fuse"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "bytes",
+ "fuser",
+ "landslide",
+ "object_store",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tokio",
+ "ulid",
+]
+
+[[package]]
+name = "landslide-sqlite"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "base64",
+ "bincode",
+ "bytes",
+ "futures-util",
+ "landslide",
+ "object_store",
+ "proptest",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "ulid",
+ "zstd",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.189"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2477,59 +2530,6 @@ dependencies = [
  "parking_lot",
  "slatedb-common",
  "thiserror 1.0.69",
-]
-
-[[package]]
-name = "slog"
-version = "0.1.0"
-dependencies = [
- "base64",
- "bincode",
- "bytes",
- "object_store",
- "serde",
- "serde_json",
- "slatedb",
- "thiserror 2.0.20",
- "tokio",
- "ulid",
-]
-
-[[package]]
-name = "slog-fuse"
-version = "0.1.0"
-dependencies = [
- "base64",
- "bytes",
- "fuser",
- "object_store",
- "serde",
- "serde_json",
- "sha2",
- "slog",
- "tokio",
- "ulid",
-]
-
-[[package]]
-name = "slog-sqlite"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "base64",
- "bincode",
- "bytes",
- "futures-util",
- "object_store",
- "proptest",
- "rusqlite",
- "serde",
- "serde_json",
- "slog",
- "tempfile",
- "tokio",
- "ulid",
- "zstd",
 ]
 
 [[package]]

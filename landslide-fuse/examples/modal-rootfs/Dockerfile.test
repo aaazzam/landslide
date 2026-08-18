@@ -1,0 +1,18 @@
+# Local validation image for the modal-rootfs topology (see test-local.sh).
+# Builds the landslidefs CLI in-tree, then assembles the same image Modal uses.
+FROM rust:1-bookworm AS build
+WORKDIR /src
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
+COPY landslide-fuse ./landslide-fuse
+COPY landslide-sqlite ./landslide-sqlite
+RUN cargo build --release -p landslide-fuse --features fuse --bin landslidefs
+
+FROM debian:bookworm-slim
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends util-linux ca-certificates procps busybox-static \
+ && rm -rf /var/lib/apt/lists/*
+COPY --from=build /src/target/release/landslidefs /usr/local/bin/landslidefs
+COPY landslide-fuse/examples/modal-rootfs/entrypoint.sh /entrypoint.sh
+COPY landslide-fuse/examples/modal-rootfs/agent-run.sh /agent-run.sh
+RUN chmod +x /entrypoint.sh /agent-run.sh

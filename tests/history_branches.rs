@@ -2,7 +2,7 @@
 //! shadow appends (last-write-wins by transaction/global seq), forks,
 //! trims, rollback windows, and refcounted branch deletion.
 
-use slog::{Event, EventStore, ExpectedVersion, NewEvent, Result};
+use landslide::{Event, EventStore, ExpectedVersion, NewEvent, Result};
 
 fn batch(tag: &str, vs: impl Iterator<Item = u64>) -> Vec<NewEvent> {
     vs.map(|v| NewEvent::new("e", format!("{tag}-{v}"))).collect()

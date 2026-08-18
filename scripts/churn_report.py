@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Churn-latency report for slog-sqlite.
+"""Churn-latency report for landslide-sqlite.
 
-Builds and runs the Rust probe (slog-sqlite/examples/churn) against a local
-directory object store and — when SLOG_TEST_BUCKET is set — real S3, then
+Builds and runs the Rust probe (landslide-sqlite/examples/churn) against a local
+directory object store and — when LANDSLIDE_TEST_BUCKET is set — real S3, then
 summarizes the SAMPLE CSV lines it emits:
 
     uv run --with matplotlib scripts/churn_report.py            # local only
-    SLOG_TEST_BUCKET=my-bucket uv run --with matplotlib \\
+    LANDSLIDE_TEST_BUCKET=my-bucket uv run --with matplotlib \\
         scripts/churn_report.py                                  # + real S3
 
 AWS creds: env vars if present, else pulled from `aws configure get`.
@@ -21,8 +21,8 @@ ROOT = Path(__file__).resolve().parent.parent
 BIN = ROOT / "target/release/examples/churn"
 PNG = Path(__file__).with_name("churn_latency.png")
 
-ROUNDS = os.environ.get("SLOG_CHURN_ROUNDS", "30")
-TXNS = os.environ.get("SLOG_CHURN_TXNS", "150")
+ROUNDS = os.environ.get("LANDSLIDE_CHURN_ROUNDS", "30")
+TXNS = os.environ.get("LANDSLIDE_CHURN_TXNS", "150")
 
 
 def pct(data, p):
@@ -37,7 +37,7 @@ def pct(data, p):
 
 def aws_env(env):
     """Env for the S3 backend: AWS creds in process env win, else ~/.aws via the CLI."""
-    if not env.get("SLOG_TEST_BUCKET"):
+    if not env.get("LANDSLIDE_TEST_BUCKET"):
         return None
     env = dict(env)
     if "AWS_ACCESS_KEY_ID" not in env:
@@ -46,7 +46,7 @@ def aws_env(env):
         ).stdout.strip()
         key, secret = get("aws_access_key_id"), get("aws_secret_access_key")
         if not key or not secret:
-            sys.exit("SLOG_TEST_BUCKET is set but no AWS_ACCESS_KEY_ID in env and no keys in ~/.aws")
+            sys.exit("LANDSLIDE_TEST_BUCKET is set but no AWS_ACCESS_KEY_ID in env and no keys in ~/.aws")
         env["AWS_ACCESS_KEY_ID"] = key
         env["AWS_SECRET_ACCESS_KEY"] = secret
     env.setdefault("AWS_REGION", "us-east-1")
@@ -55,18 +55,18 @@ def aws_env(env):
 
 def build():
     subprocess.run(
-        ["cargo", "build", "-p", "slog-sqlite", "--release", "--example", "churn"],
+        ["cargo", "build", "-p", "landslide-sqlite", "--release", "--example", "churn"],
         cwd=ROOT, check=True,
     )
 
 
 def run(backend, profile, base_env):
     env = dict(base_env)
-    env["SLOG_CHURN_ROUNDS"] = ROUNDS
-    env["SLOG_CHURN_TXNS"] = TXNS
-    env["SLOG_CHURN_PROFILE"] = profile
+    env["LANDSLIDE_CHURN_ROUNDS"] = ROUNDS
+    env["LANDSLIDE_CHURN_TXNS"] = TXNS
+    env["LANDSLIDE_CHURN_PROFILE"] = profile
     if backend == "local":
-        env.pop("SLOG_TEST_BUCKET", None)
+        env.pop("LANDSLIDE_TEST_BUCKET", None)
     proc = subprocess.run([str(BIN)], env=env, capture_output=True, text=True, check=True)
     samples, verify, name = [], None, None
     for line in proc.stdout.splitlines():
@@ -82,7 +82,7 @@ def run(backend, profile, base_env):
 
 
 def cleanup_s3(names):
-    bucket = os.environ["SLOG_TEST_BUCKET"]
+    bucket = os.environ["LANDSLIDE_TEST_BUCKET"]
     prefixes = ["churn/"] + [f"ltx/{n}" for n in names]
     for prefix in prefixes:
         subprocess.run(
@@ -140,7 +140,7 @@ def plot(all_samples):
 def main():
     build()
     s3 = aws_env(os.environ)
-    profiles = os.environ.get("SLOG_CHURN_PROFILES", "default,fastflush,compact").split(",")
+    profiles = os.environ.get("LANDSLIDE_CHURN_PROFILES", "default,fastflush,compact").split(",")
     all_samples = {}
     s3_names = []
     for backend, env in [("local", os.environ), ("s3", s3)]:

@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use bytes::Bytes;
-use slog::deps::slatedb;
-use slog::{Config, Error, EventStore, ExpectedVersion, NewEvent, PageLimit};
+use landslide::deps::slatedb;
+use landslide::{Config, Error, EventStore, ExpectedVersion, NewEvent, PageLimit};
 
 fn ev(data: &str) -> NewEvent {
     NewEvent::new("test", data.to_string())

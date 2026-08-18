@@ -1,4 +1,4 @@
-//! # slog — event streams on SlateDB / object storage
+//! # landslide — event streams on SlateDB / object storage
 //!
 //! Durable, atomic, ordered event streams backed by object storage through
 //! [SlateDB](https://slatedb.io). One process writes ([`EventStore`]); any
@@ -31,7 +31,7 @@
 //!
 //! # Application state
 //!
-//! `slog` provides streams, versions, conditional appends, snapshot
+//! `landslide` provides streams, versions, conditional appends, snapshot
 //! registration, compaction events, and forks. Application code defines the
 //! state and snapshot format. Snapshot bytes are opaque and may be a locator
 //! into external storage such as LTX segments, runtime images, or filesystem
@@ -42,10 +42,10 @@
 //! data-before-pointer contract).
 //!
 //! ```no_run
-//! use slog::{EventStore, ExpectedVersion, NewEvent};
+//! use landslide::{EventStore, ExpectedVersion, NewEvent};
 //!
 //! # #[tokio::main]
-//! # async fn main() -> slog::Result<()> {
+//! # async fn main() -> landslide::Result<()> {
 //! let store = EventStore::open_in_memory().await?; // or open(Config { path, object_store })
 //! store.append("account-42", ExpectedVersion::NoStream, vec![
 //!     NewEvent::json("opened", &serde_json::json!({"owner": "ada"}))?,

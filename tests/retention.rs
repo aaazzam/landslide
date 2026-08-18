@@ -1,8 +1,8 @@
 //! Retention (`purge_below`) and range-pushdown correctness at fork boundaries.
 
-use slog::{EventStore, ExpectedVersion, NewEvent};
+use landslide::{EventStore, ExpectedVersion, NewEvent};
 
-async fn append_n(store: &EventStore, stream: &str, start: u64, n: u64) -> slog::Result<()> {
+async fn append_n(store: &EventStore, stream: &str, start: u64, n: u64) -> landslide::Result<()> {
     let expected = if start == 0 {
         ExpectedVersion::NoStream
     } else {
@@ -13,7 +13,7 @@ async fn append_n(store: &EventStore, stream: &str, start: u64, n: u64) -> slog:
     Ok(())
 }
 
-fn versions(events: &[slog::Event]) -> Vec<u64> {
+fn versions(events: &[landslide::Event]) -> Vec<u64> {
     events.iter().map(|e| e.version).collect()
 }
 

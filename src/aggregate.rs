@@ -8,7 +8,7 @@ use crate::{Event, Result};
 /// [`compact`](crate::EventStore::compact) for free.
 ///
 /// ```
-/// # use slog::{Aggregate, Event};
+/// # use landslide::{Aggregate, Event};
 /// #[derive(Default)]
 /// struct Counter(u64);
 ///
@@ -20,10 +20,10 @@ use crate::{Event, Result};
 ///     }
 ///     // Snapshots are opt-in; override `snapshot`/`restore` to enable
 ///     // snapshot-accelerated rehydration via `compact()`.
-///     fn snapshot(&self) -> slog::Result<bytes::Bytes> {
+///     fn snapshot(&self) -> landslide::Result<bytes::Bytes> {
 ///         Ok(self.0.to_be_bytes().to_vec().into())
 ///     }
-///     fn restore(state: &[u8]) -> slog::Result<Self> {
+///     fn restore(state: &[u8]) -> landslide::Result<Self> {
 ///         Ok(Counter(u64::from_be_bytes(state.try_into().expect("8 bytes"))))
 ///     }
 /// }

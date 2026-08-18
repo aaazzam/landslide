@@ -1,5 +1,5 @@
 //! High-churn filesystem: manifests of delta segments keep mounts independent
-//! of event-history length. slog stores events and the manifest pointer;
+//! of event-history length. landslide stores events and the manifest pointer;
 //! segment bytes live in the application's object storage.
 //!
 //! Run: cargo run --example fs_snapshots
@@ -8,7 +8,7 @@ use std::collections::HashMap;
 
 use bytes::Bytes;
 use serde::{Deserialize, Serialize};
-use slog::{CompactionRecord, EventStore, ExpectedVersion, NewEvent, Result, Version};
+use landslide::{CompactionRecord, EventStore, ExpectedVersion, NewEvent, Result, Version};
 
 #[derive(Serialize, Deserialize)]
 enum FsEvent {
@@ -23,7 +23,7 @@ struct Manifest {
     segments: Vec<String>, // segment ids needed to reconstruct the state
 }
 
-fn apply(image: &mut FsImage, e: &slog::Event) {
+fn apply(image: &mut FsImage, e: &landslide::Event) {
     match e.json().unwrap() {
         FsEvent::Write { path, content } => drop(image.insert(path, content)),
         FsEvent::Delete { path } => drop(image.remove(&path)),

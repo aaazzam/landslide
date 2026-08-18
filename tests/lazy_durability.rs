@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use slog::{Config, EventStore, ExpectedVersion, NewEvent};
+use landslide::{Config, EventStore, ExpectedVersion, NewEvent};
 
 fn ev(data: &str) -> NewEvent {
     NewEvent::new("test", data.to_string())
