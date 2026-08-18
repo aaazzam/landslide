@@ -8,7 +8,7 @@ use std::time::Duration;
 
 use bytes::Bytes;
 use serde::{Deserialize, Serialize};
-use slog::{
+use landslide::{
     Aggregate, Config, Event, EventStore, EventStoreReader, ExpectedVersion, NewEvent,
     ReaderConfig, Result,
 };

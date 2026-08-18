@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use bytes::Bytes;
 use serde::{Deserialize, Serialize};
-use slog::{
+use landslide::{
     Aggregate, Error, Event, EventStore, ExpectedVersion, NewEvent,
 };
 
@@ -29,10 +29,10 @@ impl Aggregate for Account {
             Tx::Withdrawn { cents } => self.balance -= cents as i64,
         }
     }
-    fn snapshot(&self) -> slog::Result<Bytes> {
+    fn snapshot(&self) -> landslide::Result<Bytes> {
         Ok(serde_json::to_vec(self)?.into())
     }
-    fn restore(state: &[u8]) -> slog::Result<Self> {
+    fn restore(state: &[u8]) -> landslide::Result<Self> {
         Ok(serde_json::from_slice(state)?)
     }
 }
@@ -230,7 +230,7 @@ async fn custom_engines_can_drive_snapshots() {
 
     // 2. Externally produced snapshots (e.g. an LTX compaction job ran out of
     // band): register the result, listeners still get the compaction event.
-    let later = slog::CompactionRecord {
+    let later = landslide::CompactionRecord {
         stream: "db-7".into(),
         through_version: record.through_version,
         events_compacted: 3,
@@ -257,7 +257,7 @@ async fn custom_engines_can_drive_snapshots() {
 
 #[tokio::test]
 async fn compaction_jobs_have_a_journaled_lifecycle() {
-    use slog::JobStatus;
+    use landslide::JobStatus;
     let store = EventStore::open_in_memory().await.unwrap();
     store
         .append("w-1", ExpectedVersion::NoStream, vec![tx(Tx::Deposited { cents: 7 })])
@@ -302,11 +302,11 @@ async fn followers_see_new_events_and_compactions() {
     // object store (DbReader replicates committed state — poll tolerant).
     let object_store: Arc<dyn object_store::ObjectStore> =
         Arc::new(object_store::memory::InMemory::new());
-    let store = EventStore::open(slog::Config { path: "f".into(), object_store: object_store.clone(), settings: None })
+    let store = EventStore::open(landslide::Config { path: "f".into(), object_store: object_store.clone(), settings: None })
         .await
         .unwrap();
     let reader =
-        slog::EventStoreReader::open(slog::ReaderConfig { path: "f".into(), object_store, options: None })
+        landslide::EventStoreReader::open(landslide::ReaderConfig { path: "f".into(), object_store, options: None })
             .await
             .unwrap();
     let mut events = reader.follow_stream("f-1", 0, Duration::from_millis(50));

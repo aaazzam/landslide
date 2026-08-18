@@ -2,7 +2,7 @@
 //! appends/fences, `EventStore::commit` lands them in one serializable
 //! SlateDB transaction — all ops or none.
 
-use slog::{Error, EventStore, ExpectedVersion, NewEvent, Result};
+use landslide::{Error, EventStore, ExpectedVersion, NewEvent, Result};
 
 fn ev(data: &str) -> NewEvent {
     NewEvent::new("e", data.to_string())

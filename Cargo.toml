@@ -1,13 +1,13 @@
 [workspace]
-members = ["slog-fuse", "slog-sqlite"]
+members = ["landslide-fuse", "landslide-sqlite"]
 
 [package]
-name = "slog"
+name = "landslide"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
 description = "General-purpose event sourcing on OpenData Log / SlateDB and object storage."
-repository = "https://github.com/aaazzam/slog"
+repository = "https://github.com/aaazzam/landslide"
 
 [dependencies]
 slatedb = "0.15"

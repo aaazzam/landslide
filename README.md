@@ -1,18 +1,17 @@
-# slog
+# Landslide
 
-Durable, ordered event streams backed by object storage.
+An event-sourcing library built on [SlateDB](https://slatedb.io).
 
-`slog` is a Rust event-store core built on [SlateDB](https://slatedb.io). It
-provides atomic appends, optimistic concurrency, snapshots, forks, retention,
-and read-only scale-out while leaving application state and snapshot formats
-under application control.
+`landslide` provides atomic appends, optimistic concurrency, snapshots, forks,
+retention, and read-only scale-out while leaving application state and snapshot
+formats under application control.
 
 > **Status:** early-stage software (`0.1.0`). The API and on-disk format may
 > change while the project settles.
 
-## Why slog?
+## Why landslide?
 
-Most event stores assume a long-running server owns the data path. `slog`
+Most event stores assume a long-running server owns the data path. `landslide`
 keeps the durable state in an object store and exposes a small Rust API over
 that state:
 
@@ -58,7 +57,7 @@ An append is a batch: all events commit together or none do. The expected
 version is checked in the same serializable transaction as the write.
 
 ```rust
-use slog::{EventStore, ExpectedVersion, NewEvent};
+use landslide::{EventStore, ExpectedVersion, NewEvent};
 
 let commit = store
     .append(
@@ -106,7 +105,7 @@ Implement `Aggregate` when a stream maps naturally to a typed state machine:
 
 ```rust
 use bytes::Bytes;
-use slog::{Aggregate, Event, Result};
+use landslide::{Aggregate, Event, Result};
 
 #[derive(Default)]
 struct Counter(u64);
@@ -124,7 +123,7 @@ impl Aggregate for Counter {
 
     fn restore(bytes: &[u8]) -> Result<Self> {
         let value = u64::from_be_bytes(bytes.try_into().map_err(|_| {
-            slog::Error::InvalidInput("counter snapshot must be 8 bytes".into())
+            landslide::Error::InvalidInput("counter snapshot must be 8 bytes".into())
         })?);
         Ok(Self(value))
     }
@@ -202,8 +201,8 @@ chain, so a reader does not need to scan unrelated history.
 To explore the repository locally:
 
 ```sh
-git clone https://github.com/aaazzam/slog.git
-cd slog
+git clone https://github.com/aaazzam/landslide.git
+cd landslide
 cargo test --workspace --all-targets
 ```
 
@@ -211,7 +210,7 @@ Add the core crate from GitHub:
 
 ```toml
 [dependencies]
-slog = { git = "https://github.com/aaazzam/slog" }
+landslide = { git = "https://github.com/aaazzam/landslide" }
 bytes = "1"
 serde_json = "1"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
@@ -220,10 +219,10 @@ tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 Then append and read a stream:
 
 ```rust
-use slog::{EventStore, ExpectedVersion, NewEvent};
+use landslide::{EventStore, ExpectedVersion, NewEvent};
 
 #[tokio::main]
-async fn main() -> slog::Result<()> {
+async fn main() -> landslide::Result<()> {
     let store = EventStore::open_in_memory().await?;
 
     let commit = store
@@ -252,7 +251,7 @@ The in-memory backend is useful for tests and examples. For a persistent
 namespace, provide an `object_store::ObjectStore` and a path:
 
 ```rust
-let store = slog::EventStore::open(slog::Config {
+let store = landslide::EventStore::open(landslide::Config {
     path: "production/app".into(),
     object_store: bucket,
     settings: None,
@@ -269,13 +268,13 @@ settings instead.
 
 | Crate | Purpose |
 | --- | --- |
-| [`slog`](https://github.com/aaazzam/slog) | Core event streams, concurrency, snapshots, forks, readers, and retention |
-| [`slog-fuse`](slog-fuse/) | Filesystem volumes, live replicas, FUSE mounts, and directory mirrors |
-| [`slog-sqlite`](slog-sqlite/) | SQLite WAL capture, page-delta replication, checkpoints, and point-in-time restore |
+| [`landslide`](https://github.com/aaazzam/landslide) | Core event streams, concurrency, snapshots, forks, readers, and retention |
+| [`landslide-fuse`](landslide-fuse/) | Filesystem volumes, live replicas, FUSE mounts, and directory mirrors |
+| [`landslide-sqlite`](landslide-sqlite/) | SQLite WAL capture, page-delta replication, checkpoints, and point-in-time restore |
 
-### `slog-fuse`
+### `landslide-fuse`
 
-`slog-fuse` maps a volume to a filesystem image. A `Volume` is the fenced
+`landslide-fuse` maps a volume to a filesystem image. A `Volume` is the fenced
 writer; a `Replica` is a read-only live view. The `Mirror` type materializes a
 replica into a normal directory and needs no FUSE support, which is useful in
 containers and restricted environments.
@@ -284,23 +283,23 @@ The optional FUSE adapter requires libfuse on Linux or macFUSE on macOS:
 
 ```sh
 # Writable FUSE mount
-cargo run -p slog-fuse --features fuse --bin slogfs -- mount my-volume /mnt/slog
+cargo run -p landslide-fuse --features fuse --bin landslidefs -- mount my-volume /mnt/landslide
 
 # Read-only FUSE replica
-cargo run -p slog-fuse --features fuse --bin slogfs -- follow my-volume /mnt/slog
+cargo run -p landslide-fuse --features fuse --bin landslidefs -- follow my-volume /mnt/landslide
 
 # Directory mirror; no FUSE feature required
-cargo run -p slog-fuse --bin slogfs -- mirror follow my-volume /tmp/slog-rootfs
+cargo run -p landslide-fuse --bin landslidefs -- mirror follow my-volume /tmp/landslide-rootfs
 ```
 
-The CLI uses a local directory at `/tmp/slog-bucket` by default. Set
-`SLOG_BUCKET` for S3, or `SLOG_BUCKET_DIR` for another local directory;
-`SLOG_PATH` selects the SlateDB namespace.
+The CLI uses a local directory at `/tmp/landslide-bucket` by default. Set
+`LANDSLIDE_BUCKET` for S3, or `LANDSLIDE_BUCKET_DIR` for another local directory;
+`LANDSLIDE_PATH` selects the SlateDB namespace.
 
-### `slog-sqlite`
+### `landslide-sqlite`
 
-`slog-sqlite` keeps a local SQLite database in WAL mode and streams committed
-page post-images into a slog stream. Checkpoints seal page deltas into
+`landslide-sqlite` keeps a local SQLite database in WAL mode and streams committed
+page post-images into a landslide stream. Checkpoints seal page deltas into
 compressed LTX segments and publish a manifest. A new process can reconstruct
 the database from the manifest plus the remaining delta backlog.
 
@@ -312,7 +311,7 @@ The adapter supports:
 - point-in-time restore with `restore_at` while history is retained;
 - reconstruction into a fresh local database file.
 
-See [`slog-sqlite/examples/churn.rs`](slog-sqlite/examples/churn.rs) and the
+See [`landslide-sqlite/examples/churn.rs`](landslide-sqlite/examples/churn.rs) and the
 integration tests for complete setups.
 
 ## Configuration and deployment notes
@@ -325,7 +324,7 @@ integration tests for complete setups.
   `append` is intentionally cooperative and does not require a fence token.
 - `read_history` is the branch-resolved view; use `read_stream` when you need
   the stream's local physical records.
-- Snapshot bytes are not interpreted by slog. If they reference external
+- Snapshot bytes are not interpreted by landslide. If they reference external
   objects, publish only after those objects are durable.
 - A single event payload is capped at 1 MiB and an append batch at 1,000
   records. Adapters chunk larger payloads before appending.
@@ -343,7 +342,7 @@ cargo run --example fs_snapshots
 The workspace also contains integration coverage for forks, lazy durability,
 retention, concurrent writers, filesystem replicas, SQLite recovery, and
 point-in-time restore. The S3 integration tests run when
-`SLOG_TEST_BUCKET` is configured.
+`LANDSLIDE_TEST_BUCKET` is configured.
 
 ## License
 

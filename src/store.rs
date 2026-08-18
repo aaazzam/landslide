@@ -36,7 +36,7 @@ pub struct Config {
     pub path: String,
     pub object_store: Arc<dyn object_store::ObjectStore>,
     /// SlateDB tuning passthrough (compactor/GC schedules, caches, flush
-    /// intervals). `None` = slog's tuned profile (see
+    /// intervals). `None` = landslide's tuned profile (see
     /// [`default_settings`]); `Some(Settings::default())` = stock SlateDB.
     pub settings: Option<slatedb::config::Settings>,
 }
@@ -45,7 +45,7 @@ impl Config {
     /// Volatile in-memory backend; for tests and development.
     pub fn in_memory() -> Self {
         Self {
-            path: "slog".into(),
+            path: "landslide".into(),
             object_store: Arc::new(object_store::memory::InMemory::new()),
             settings: None,
         }
@@ -595,7 +595,7 @@ impl EventStore {
             job_id,
             ts_ms: crate::envelope::now_ms(),
         };
-        // The folded bytes go straight into slog's own durable store, so
+        // The folded bytes go straight into landslide's own durable store, so
         // everything about this snapshot is verifiable in-store. Publish
         // atomically: pointer + announcement in one transaction.
         self.publish_snapshot(stream, record.clone(), state).await?;
@@ -606,7 +606,7 @@ impl EventStore {
     /// the compaction — atomically, in one transaction.
     ///
     /// Application code produces and durably stores the snapshot state;
-    /// slog publishes the pointer. Any data referenced by `state` must be
+    /// landslide publishes the pointer. Any data referenced by `state` must be
     /// durable before this call. Use content-addressed locators or checksums
     /// in `state` when readers need integrity for external bytes.
     ///
@@ -885,8 +885,8 @@ impl EventStore {
     }
 }
 
-/// slog's default SlateDB profile, tuned against the churn probe
-/// (`slog-sqlite/examples/churn`, run over real S3):
+/// landslide's default SlateDB profile, tuned against the churn probe
+/// (`landslide-sqlite/examples/churn`, run over real S3):
 ///
 /// - 10ms WAL flush tick (stock: 100ms). `await_durable` resolves on the
 ///   tick, so the tick is the sync latency floor: ~100ms → ~10ms locally,

@@ -1,7 +1,7 @@
 //! Durable-stream semantics: sequence assignment, timestamp monotonicity,
 //! trim points, bounded reads, tombstoned streams.
 
-use slog::{EventStore, ExpectedVersion, NewEvent, Result};
+use landslide::{EventStore, ExpectedVersion, NewEvent, Result};
 
 fn rec(n: u64) -> NewEvent {
     NewEvent::new("r", format!("r{n}"))
